@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Detective's Dossier</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        :root {
+            --bg-light: #ffffff;
+            --bg-dark: #1f2937;
+            --text-light: #1f2937;
+            --text-dark: #f9fafb;
+            --card-light: #f3f4f6;
+            --card-dark: #374151;
+            --accent: #ef4444; /* red-500 */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.5s, color 0.5s;
+        }
+        .light body {
+            background-color: var(--bg-light);
+            color: var(--text-light);
+        }
+        .dark body {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+        .light .card {
+            background-color: var(--card-light);
+        }
+        .dark .card {
+            background-color: var(--card-dark);
+        }
+        .toggle-btn {
+            transition: transform 0.3s ease-in-out;
+        }
+        .toggle-btn:hover {
+            transform: scale(1.1);
+        }
+        .button {
+            transition: all 0.2s ease-in-out;
+        }
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .glow {
+            animation: pulse-glow 2s infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(239, 68, 68, 0.4), 0 0 10px rgba(239, 68, 68, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.6), 0 0 30px rgba(239, 68, 68, 0.4); }
+        }
+        /* Custom styles for the avatar images */
+        .avatar-image {
+            width: 96px; /* equivalent to w-24 */
+            height: 96px; /* equivalent to h-24 */
+            border-radius: 9999px; /* equivalent to rounded-full */
+            border: 4px solid var(--accent); /* equivalent to border-4 border-red-500 */
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200">
+
+    <!-- Container for the entire application -->
+    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+        
+        <!-- Header with title and Dark/Light Mode toggle -->
+        <header class="w-full max-w-5xl flex justify-between items-center py-4 mb-8">
+            <h1 class="text-4xl font-bold text-red-500 tracking-wider">The Detective's Dossier</h1>
+            <div class="flex items-center space-x-4">
+                <div class="flex flex-col items-end text-sm text-gray-400">
+                    <p>Daily Streak: <span id="daily-streak" class="text-white font-bold">0</span></p>
+                    <p>Super Streak: <span id="super-streak" class="text-white font-bold">0</span></p>
+                </div>
+                <button id="theme-toggle" class="toggle-btn p-3 rounded-full bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors">
+                    <i class="fas fa-sun block dark:hidden"></i>
+                    <i class="fas fa-moon hidden dark:block"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main content area -->
+        <main class="w-full max-w-5xl">
+
+            <!-- Level Selection Screen -->
+            <section id="level-selection-screen" class="space-y-8 flex flex-col items-center justify-center text-center">
+                <h2 class="text-3xl font-semibold mb-6">Choose Your Challenge, Detective</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
+                    <button id="level-beginner" data-level="Beginner" class="button card p-6 rounded-xl shadow-lg bg-gray-800 hover:bg-gray-700">
+                        <h3 class="text-2xl font-bold text-red-400">Beginner</h3>
+                        <p class="text-gray-400 mt-2">A foundational case, with a clever twist.</p>
+                        <div class="timer hidden mt-4 text-red-500 font-bold"></div>
+                    </button>
+                    <button id="level-intermediate" data-level="Intermediate" class="button card p-6 rounded-xl shadow-lg bg-gray-800 hover:bg-gray-700">
+                        <h3 class="text-2xl font-bold text-red-400">Intermediate</h3>
+                        <p class="text-gray-400 mt-2">Complex alibis, a web of deceit.</p>
+                        <div class="timer hidden mt-4 text-red-500 font-bold"></div>
+                    </button>
+                    <button id="level-pro" data-level="Pro" class="button card p-6 rounded-xl shadow-lg bg-gray-800 hover:bg-gray-700">
+                        <h3 class="text-2xl font-bold text-red-400">Pro</h3>
+                        <p class="text-gray-400 mt-2">Subtle lies, no logical flaws.</p>
+                        <div class="timer hidden mt-4 text-red-500 font-bold"></div>
+                    </button>
+                    <button id="level-expert" data-level="Expert" class="button card p-6 rounded-xl shadow-lg bg-gray-800 hover:bg-gray-700">
+                        <h3 class="text-2xl font-bold text-red-400">Expert</h3>
+                        <p class="text-gray-400 mt-2">Pure deduction, the ultimate test.</p>
+                        <div class="timer hidden mt-4 text-red-500 font-bold"></div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- Game Screen (initially hidden) -->
+            <section id="game-screen" class="hidden space-y-8">
+                <button id="back-button" class="button card bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-lg shadow-md flex items-center mb-4">
+                    <i class="fas fa-arrow-left mr-2"></i> Back to Levels
+                </button>
+                <div id="case-debriefing" class="card bg-gray-800 p-8 rounded-xl shadow-lg">
+                    <h2 class="text-2xl font-bold text-red-400 mb-4">Case Debriefing</h2>
+                    <p id="debrief-text" class="text-gray-300"></p>
+                </div>
+
+                <div class="flex flex-col lg:flex-row gap-8">
+                    <!-- Suspects Section -->
+                    <div class="w-full lg:w-2/3 space-y-6">
+                        <h2 class="text-2xl font-bold text-red-400">Suspects</h2>
+                        <div id="suspects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                            <!-- Suspect cards will be dynamically inserted here -->
+                        </div>
+                    </div>
+
+                    <!-- Deduction & Message Box Section -->
+                    <div class="w-full lg:w-1/3 space-y-6">
+                        <div id="deduction-form" class="card bg-gray-800 p-6 rounded-xl shadow-lg">
+                            <h2 class="text-2xl font-bold text-red-400 mb-4">Your Deduction</h2>
+                            <p class="text-gray-400 mb-4">Who is the culprit, Detective?</p>
+                            <input type="text" id="culprit-input" placeholder="Enter name here..." class="w-full bg-gray-700 text-gray-200 rounded-lg p-3 border-none focus:outline-none focus:ring-2 focus:ring-red-500">
+                            <button id="submit-deduction" class="button w-full mt-4 bg-red-500 text-white font-bold py-3 rounded-lg shadow-md hover:bg-red-600 transition-colors">
+                                Submit
+                            </button>
+                        </div>
+                        
+                        <!-- Message Box for game feedback -->
+                        <div id="message-box" class="card bg-gray-800 p-6 rounded-xl shadow-lg hidden">
+                            <p id="message-text" class="text-center font-semibold text-xl"></p>
+                            <p id="culprit-reason" class="text-gray-400 text-sm mt-2 hidden"></p>
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+    </div>
+
+    <script>
+        // Use a self-invoking function to avoid global variables
+        (function() {
+            // --- UI Elements ---
+            const themeToggle = document.getElementById('theme-toggle');
+            const levelSelectionScreen = document.getElementById('level-selection-screen');
+            const gameScreen = document.getElementById('game-screen');
+            const levelButtons = document.querySelectorAll('#level-selection-screen .button');
+            const backButton = document.getElementById('back-button');
+            const debriefText = document.getElementById('debrief-text');
+            const suspectsContainer = document.getElementById('suspects-container');
+            const culpritInput = document.getElementById('culprit-input');
+            const submitDeductionButton = document.getElementById('submit-deduction');
+            const messageBox = document.getElementById('message-box');
+            const messageText = document.getElementById('message-text');
+            const culpritReason = document.getElementById('culprit-reason');
+            const dailyStreakEl = document.getElementById('daily-streak');
+            const superStreakEl = document.getElementById('super-streak');
+
+            // --- Game Data (Mock Cases) ---
+            const cases = {
+                'Beginner': [
+                    {
+                        debrief: "A famous art critic, Alistair Finch, was discovered deceased in his private gallery. The cause of death was a single, precise gunshot wound. The final log of the gallery's security system shows him arguing with three individuals just moments before his death. The scene contains no fingerprints, and a quick search reveals no weapon. Your task is to identify the killer based on their statements and alibis alone.",
+                        suspects: [
+                            { name: "John Smith", alibi: "I was at home, watching the news. I have no witnesses, but a power outage at the time of the murder confirms I wasn't able to record any shows, which I normally do.", isCulprit: false, gender: "male" },
+                            { name: "Jane Doe", alibi: "I was having dinner at a restaurant, but I stepped outside for a phone call that lasted precisely ten minutes. The call records show I was on the phone at the time of the murder.", isCulprit: true, gender: "female" },
+                            { name: "Robert Johnson", alibi: "I was at a charity gala all night. I have pictures to prove it, and the time stamps on them show me arriving and leaving.", isCulprit: false, gender: "male" }
+                        ],
+                        reason: "Jane Doe's call lasted exactly ten minutes, the same duration as the gap in security footage, which gave her the perfect opportunity to commit the crime and leave without being seen."
+                    }
+                ],
+                'Intermediate': [
+                    {
+                        debrief: "The 'Star of Orion,' a priceless diamond, was stolen from a high-security vault. The vault's laser grid and pressure sensors were not triggered. The only clue left behind is a single speck of rare interstellar dust, a substance that only a handful of people in the world have access to. Three people, all with expertise in advanced security, had access to the vault's blueprints.",
+                        suspects: [
+                            { name: "Alex Vexler", alibi: "I was on a business flight to Tokyo during the robbery. My flight ticket confirms this, and I had my phone off during the flight.", isCulprit: false, gender: "male" },
+                            { name: "Sarah Collins", alibi: "I was training at my gym. The security camera footage will show I never left, but there is a 30-minute gap in the footage due to a routine system reboot.", isCulprit: true, gender: "female" },
+                            { name: "Michael Vance", alibi: "I was at a movie premiere, sitting next to a dozen reporters who saw me the entire time. Their reports confirm my attendance and seating arrangement.", isCulprit: false, gender: "male" }
+                        ],
+                        reason: "Sarah Collins' alibi had a 30-minute gap, giving her enough time to disable the vault's sensors and execute the robbery. The 'reboot' was a deliberate distraction."
+                    }
+                ],
+                'Pro': [
+                    {
+                        debrief: "A brilliant quantum physicist, Dr. Aris Thorne, was found deceased in his fully sealed, locked laboratory. The lab's internal airlock logs show no one entered or left the room during the time of death. The only way in or out is via this airlock. Four of his colleagues, all with high-level access to the facility, were present on the same floor at the time. The victim was working on a highly classified project.",
+                        suspects: [
+                            { name: "Dr. Anya Sharma", alibi: "I was in the observation room, logged in for data analysis. The server logs confirm my access time and that I was active the entire period.", isCulprit: false, gender: "female" },
+                            { name: "Dr. Ben Carter", alibi: "I was retrieving equipment from the supply closet. The door log shows I was there at the time, but the log doesn't specify how long the door was open.", isCulprit: false, gender: "male" },
+                            { name: "Dr. Eva Chen", alibi: "I was performing a remote software update on the lab's system. The system logs will show my IP address was active at that time, but it doesn't indicate if I was physically present or connected to any local network.", isCulprit: true, gender: "female" },
+                            { name: "Dr. Leo Vance", alibi: "I was in the break room, getting coffee. There's no camera there, but I'm telling the truth. I finished my coffee and immediately returned to my office.", isCulprit: false, gender: "male" }
+                        ],
+                        reason: "Dr. Eva Chen could have remotely opened the airlock using her software access and used a drone or robotic arm to carry out the murder from a distance, without needing to physically enter or leave the room."
+                    }
+                ],
+                'Expert': [
+                    {
+                        debrief: "An intelligence operative was poisoned during a high-stakes poker game. The poison, a rare synthetic compound, takes exactly 2 hours to take effect and must be administered orally. There were four players at the table, all of whom can confirm that no one touched the victim's drink. The victim had been drinking continuously for the past hour and a half. The question is not who administered the poison, but *when* it was administered.",
+                        suspects: [
+                            { name: "Elias Kane", alibi: "I ordered the same drink as the victim but from a different bartender. I never let it out of my sight and finished mine twenty minutes before the victim showed symptoms.", isCulprit: false, gender: "male" },
+                            { name: "Cassandra Reed", alibi: "I was in a separate room for the two-hour window, preparing my next move in a strategic card game. There were no distractions and no one came to talk to me.", isCulprit: false, gender: "female" },
+                            { name: "Julian Thorne", alibi: "I was on the phone with my associate the entire time. The call log can prove it. The call ended one minute after the victim's symptoms began.", isCulprit: true, gender: "male" },
+                            { name: "Victoria Price", alibi: "I was in a heated argument with one of the other players, far from the victim's table. We were shouting at each other for about 30 minutes straight.", isCulprit: false, gender: "female" }
+                        ],
+                        reason: "Julian Thorne's phone call was a ruse. He was actually using a micro-drone to drop the poison into the victim's drink. The end of the call coinciding with the symptoms beginning was a deliberate signal."
+                    }
+                ]
+            };
+
+            // --- State and UI Management ---
+            let currentLevel = '';
+            let currentCase = null;
+            let levelsCompletedToday = [];
+
+            // Helper function to show/hide screens
+            function showScreen(screenToShow) {
+                levelSelectionScreen.classList.add('hidden');
+                gameScreen.classList.add('hidden');
+                screenToShow.classList.remove('hidden');
+            }
+
+            // Helper function to reset game state
+            function resetGame() {
+                culpritInput.value = '';
+                messageBox.classList.add('hidden');
+                culpritReason.classList.add('hidden');
+            }
+
+            // --- Game Logic ---
+            function startGame(level) {
+                currentLevel = level;
+                currentCase = cases[level][Math.floor(Math.random() * cases[level].length)];
+                
+                debriefText.textContent = currentCase.debrief;
+                renderSuspects(currentCase.suspects);
+                resetGame();
+                showScreen(gameScreen);
+            }
+
+            function renderSuspects(suspects) {
+                suspectsContainer.innerHTML = '';
+                suspects.forEach(suspect => {
+                    // Using Dicebear API for reliable, unique, gender-based avatars.
+                    const faceUrl = `https://api.dicebear.com/7.x/adventurer/svg?seed=${suspect.name}&gender=${suspect.gender}`;
+                    const suspectCard = `
+                        <div class="card p-6 rounded-xl shadow-lg space-y-4">
+                            <img src="${faceUrl}" alt="${suspect.name}'s face" class="avatar-image mx-auto border-4 border-red-500">
+                            <h3 class="text-xl font-semibold text-center text-red-300">${suspect.name}</h3>
+                            <p class="text-gray-400 text-sm italic">"${suspect.alibi}"</p>
+                        </div>
+                    `;
+                    suspectsContainer.innerHTML += suspectCard;
+                });
+            }
+            
+            function checkDeduction() {
+                const userGuess = culpritInput.value.trim();
+                if (!userGuess) {
+                    showMessage('Please enter a name, Detective.', 'text-yellow-500');
+                    return;
+                }
+
+                const correctCulprit = currentCase.suspects.find(s => s.isCulprit);
+
+                if (userGuess.toLowerCase() === correctCulprit.name.toLowerCase()) {
+                    showMessage('Correct! You have solved the case. A true master detective!', 'text-green-500');
+                    disableLevelTemporarily(currentLevel);
+                    updateStreaks(true);
+                } else {
+                    showMessage(`Incorrect. The truth is more subtle. The culprit was ${correctCulprit.name}.`, 'text-red-500');
+                    culpritReason.textContent = currentCase.reason;
+                    culpritReason.classList.remove('hidden');
+                    disableLevelTemporarily(currentLevel);
+                    updateStreaks(false);
+                }
+                submitDeductionButton.disabled = true;
+            }
+            
+            function showMessage(text, colorClass) {
+                messageText.textContent = text;
+                messageText.className = `${colorClass} text-center font-semibold text-xl`;
+                messageBox.classList.remove('hidden');
+            }
+
+            // --- Streak Logic ---
+            function updateStreaks(isCorrect) {
+                const today = new Date().toDateString();
+                const lastSolvedDate = localStorage.getItem('lastSolvedDate');
+                let dailyStreak = parseInt(localStorage.getItem('dailyStreak') || 0);
+                let superStreak = parseInt(localStorage.getItem('superStreak') || 0);
+
+                if (isCorrect) {
+                    // Update levels completed today for Super Streak
+                    if (!levelsCompletedToday.includes(currentLevel)) {
+                        levelsCompletedToday.push(currentLevel);
+                        localStorage.setItem('levelsCompletedToday', JSON.stringify(levelsCompletedToday));
+                    }
+
+                    // Check for Super Streak
+                    if (levelsCompletedToday.length === 4) {
+                        superStreak++;
+                        localStorage.setItem('superStreak', superStreak);
+                        levelsCompletedToday = []; // Reset for the next day
+                        localStorage.setItem('levelsCompletedToday', JSON.stringify(levelsCompletedToday));
+                    }
+                    
+                    // Update Daily Streak
+                    const yesterday = new Date(new Date().setDate(new Date().getDate() - 1)).toDateString();
+                    if (lastSolvedDate === yesterday) {
+                        dailyStreak++;
+                    } else if (lastSolvedDate !== today) {
+                        dailyStreak = 1;
+                    }
+                    localStorage.setItem('dailyStreak', dailyStreak);
+                    localStorage.setItem('lastSolvedDate', today);
+                } else {
+                    // Streak broken if incorrect guess
+                    dailyStreak = 0;
+                    localStorage.setItem('dailyStreak', dailyStreak);
+                }
+                displayStreaks();
+            }
+
+            function displayStreaks() {
+                const dailyStreak = localStorage.getItem('dailyStreak') || 0;
+                const superStreak = localStorage.getItem('superStreak') || 0;
+                dailyStreakEl.textContent = dailyStreak;
+                superStreakEl.textContent = superStreak;
+            }
+
+            // --- Daily Refresh Logic ---
+            function disableLevelTemporarily(level) {
+                const button = document.getElementById(`level-${level.toLowerCase()}`);
+                const timerElement = button.querySelector('.timer');
+                
+                // Set the timestamp for the current day
+                const today = new Date().toDateString();
+                let lastPlayedDates = JSON.parse(localStorage.getItem('lastPlayedDates') || '{}');
+                lastPlayedDates[level] = today;
+                localStorage.setItem('lastPlayedDates', JSON.stringify(lastPlayedDates));
+
+                button.disabled = true;
+                timerElement.classList.remove('hidden');
+                startCountdown(timerElement);
+            }
+
+            function checkLastPlayed() {
+                const today = new Date().toDateString();
+                let lastPlayedDates = JSON.parse(localStorage.getItem('lastPlayedDates') || '{}');
+                levelsCompletedToday = JSON.parse(localStorage.getItem('levelsCompletedToday') || '[]');
+
+                levelButtons.forEach(button => {
+                    const level = button.dataset.level;
+                    const lastPlayDate = lastPlayedDates[level];
+                    const timerElement = button.querySelector('.timer');
+
+                    if (lastPlayDate === today) {
+                        button.disabled = true;
+                        timerElement.classList.remove('hidden');
+                        startCountdown(timerElement);
+                    } else {
+                        button.disabled = false;
+                        timerElement.classList.add('hidden');
+                        button.querySelector('h3').textContent = level; // Reset button text
+                    }
+                });
+            }
+            
+            function startCountdown(timerElement) {
+                const countdown = setInterval(() => {
+                    const now = new Date();
+                    const midnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+                    const diff = midnight - now;
+
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                    timerElement.textContent = `Case refreshes in ${hours}h ${minutes}m ${seconds}s`;
+
+                    if (diff < 0) {
+                        clearInterval(countdown);
+                        checkLastPlayed(); // Re-enable the button
+                    }
+                }, 1000);
+            }
+
+            // --- Event Listeners ---
+            levelButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    startGame(button.dataset.level);
+                });
+            });
+
+            backButton.addEventListener('click', () => {
+                showScreen(levelSelectionScreen);
+                checkLastPlayed();
+                submitDeductionButton.disabled = false;
+            });
+
+            submitDeductionButton.addEventListener('click', checkDeduction);
+            culpritInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    checkDeduction();
+                }
+            });
+
+            themeToggle.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark');
+            });
+            
+            // Initial checks on page load
+            document.addEventListener('DOMContentLoaded', () => {
+                checkLastPlayed();
+                displayStreaks();
+            });
+
+        })();
+    </script>
+</body>
+</html>
